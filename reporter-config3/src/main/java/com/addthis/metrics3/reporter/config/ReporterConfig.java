@@ -56,6 +56,8 @@ public class ReporterConfig extends AbstractReporterConfig {
     private List<ZabbixReporterConfig> zabbix;
     @Valid
     private List<PrometheusReporterConfig> prometheus;
+    @Valid
+    private List<HttpReporterConfig> http;
 
     private boolean jvmMetricsEnabled = false;
 
@@ -105,6 +107,14 @@ public class ReporterConfig extends AbstractReporterConfig {
 
     public void setRiemann(List<RiemannReporterConfig> riemann) {
         this.riemann = riemann;
+    }
+
+    public void setHttp(List<HttpReporterConfig> http) {
+        this.http = http;
+    }
+
+    public List<HttpReporterConfig> getHttp() {
+        return this.http;
     }
 
     public List<StatsDReporterConfig> getStatsd() {
@@ -268,6 +278,22 @@ public class ReporterConfig extends AbstractReporterConfig {
         return !failures;
     }
 
+    public boolean enableHttp(MetricRegistry registry) {
+        boolean failures = false;
+        if (http == null) {
+            log.debug("Asked to enable http, but it was not configured");
+            return false;
+        }
+
+        for (HttpReporterConfig httpConfig: http) {
+            if (!httpConfig.enable(registry)) {
+                failures = false;
+            }
+        }
+
+        return !failures;
+    }
+
     public boolean enableAll(MetricRegistry registry) {
         boolean enabled = false;
         if (console != null && enableConsole(registry)) {
@@ -295,6 +321,9 @@ public class ReporterConfig extends AbstractReporterConfig {
             enabled = true;
         }
         if (prometheus != null && enablePrometheus(registry)) {
+            enabled = true;
+        }
+        if (http != null && enableHttp(registry)) {
             enabled = true;
         }
         if (!enabled) {
@@ -334,6 +363,7 @@ public class ReporterConfig extends AbstractReporterConfig {
         report(riemann);
         report(zabbix);
         report(prometheus);
+        report(http);
     }
 
     public static ReporterConfig loadFromFileAndValidate(String fileName) throws IOException {

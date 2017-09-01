@@ -48,6 +48,7 @@ public class SampleTest {
             Thread.sleep(1000);
             log.debug("runLoop tick");
         }
+
         log.info("Done with sample data loop");
     }
 
@@ -151,6 +152,15 @@ public class SampleTest {
         ReporterConfig config = ReporterConfig.loadFromFile("src/test/resources/sample/multi.yaml");
         System.out.println(yaml.dump(config));
         log.info("Multi Reporter");
+        runLoop(config);
+    }
+
+    @Test
+    public void sampleHttp() throws Exception
+    {
+        ReporterConfig config = ReporterConfig.loadFromFile("src/test/resources/sample/http.yaml");
+        System.out.println(yaml.dump(config));
+        log.info("Sample http");
         runLoop(config);
     }
 
