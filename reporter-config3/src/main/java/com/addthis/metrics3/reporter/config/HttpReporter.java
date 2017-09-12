@@ -107,7 +107,9 @@ public class HttpReporter extends ScheduledReporter {
         this.httpClient = HttpClientBuilder.create().build();
         this.uri = uri;
         this.mapper = new ObjectMapper().registerModule(
-                new MetricsModule(rateUnit, durationUnit, true, filter));
+                new MetricsModule(rateUnit, durationUnit, false, filter));
+
+        log.info("Activating HttpReporter for {}", uri.toString());
     }
 
     @Override
