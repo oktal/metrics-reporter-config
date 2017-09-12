@@ -43,9 +43,12 @@ public class HttpReporterConfig extends AbstractHttpReporterConfig implements Me
                     HttpReporter.forRegistry(registry)
                                 .setHost(hostPort.getHost())
                                 .setPort(hostPort.getPort())
+                                .setPrefix(getResolvedPrefix())
                                 .build();
 
             log.debug("Activating HttpReporterConfig for host {}:{}", hostPort.getHost(), hostPort.getPort());
+
+            reporter.start(getPeriod(), getRealRateunit());
             reporters.add(reporter);
         }
 
