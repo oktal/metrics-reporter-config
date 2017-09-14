@@ -42,6 +42,10 @@ public class HttpReporter extends ScheduledReporter {
         private String host;
         private int port;
 
+        private String dataCenterName;
+
+        private String hostName;
+
         private String prefix;
 
         private Builder(final MetricRegistry registry) {
@@ -83,9 +87,19 @@ public class HttpReporter extends ScheduledReporter {
             return this;
         }
 
+        Builder setDatacenterName(String dataCenterName) {
+            this.dataCenterName = dataCenterName;
+            return this;
+        }
+
+        Builder setHostName(String hostName) {
+            this.hostName = hostName;
+            return this;
+        }
+
         private URI makeUri() {
             try {
-                return new URL(String.format("http://%s:%d%s", host, port, prefix)).toURI();
+                return new URL(String.format("http://%s:%d%s/%s/%s", host, port, prefix, dataCenterName, hostName)).toURI();
             } catch (Exception e) {
                 log.error("Could not create URL: {}", e.getMessage());
             }

@@ -32,9 +32,17 @@ public class HttpReporterConfig extends AbstractHttpReporterConfig implements Me
 
     private List<HttpReporter> reporters;
 
+
     @Override
     public boolean enable(MetricRegistry registry)
     {
+        if (hostname == null)
+            hostname = System.getenv("COMPUTERNAME");
+        if (hostname == null)
+            hostname = System.getenv("HOSTNAME");
+        if (hostname == null)
+            hostname = "localhost";
+
         reporters = new ArrayList<HttpReporter>();
 
         for (HostPort hostPort: getFullHostList())
@@ -44,6 +52,8 @@ public class HttpReporterConfig extends AbstractHttpReporterConfig implements Me
                                 .setHost(hostPort.getHost())
                                 .setPort(hostPort.getPort())
                                 .setPrefix(getResolvedPrefix())
+                                .setDatacenterName(getDatacenter())
+                                .setHostName(getHostname())
                                 .build();
 
             log.debug("Activating HttpReporterConfig for host {}:{}", hostPort.getHost(), hostPort.getPort());

@@ -23,10 +23,37 @@ public class AbstractHttpReporterConfig extends AbstractHostPortReporterConfig
 {
     private static final Logger log = LoggerFactory.getLogger(AbstractStatsDReporterConfig.class);
 
+    // @Improvement
+    //      Can this be automatically discovered through the Snitch instead of being configured manually ?
+
+    protected String datacenter;
+
+    protected String hostname;
+
     @Override
     public List<HostPort> getFullHostList()
     {
         return getHostListAndStringList();
+    }
+
+    public String getDatacenter()
+    {
+        return this.datacenter;
+    }
+
+    public void setDatacenter(String datacenter)
+    {
+        this.datacenter = datacenter;
+    }
+
+    public String getHostname()
+    {
+        return this.hostname;
+    }
+
+    public void setHostname(String hostname)
+    {
+        this.hostname = hostname;
     }
 
     protected boolean setup(String className)
