@@ -4,7 +4,9 @@ import com.codahale.metrics.*;
 import com.codahale.metrics.json.MetricsModule;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
@@ -48,6 +50,7 @@ public class HttpReporter extends ScheduledReporter {
 
         private String prefix;
 
+
         private Builder(final MetricRegistry registry) {
             this.registry = registry;
             this.rateUnit = TimeUnit.SECONDS;
@@ -64,11 +67,6 @@ public class HttpReporter extends ScheduledReporter {
 
         Builder setDurationUnit(TimeUnit durationUnit) {
             this.durationUnit = durationUnit;
-            return this;
-        }
-
-        Builder setMetricFilter(MetricFilter filter) {
-            this.filter = filter;
             return this;
         }
 
@@ -94,6 +92,11 @@ public class HttpReporter extends ScheduledReporter {
 
         Builder setHostName(String hostName) {
             this.hostName = hostName;
+            return this;
+        }
+
+        Builder setFilter(MetricFilter filter) {
+            this.filter = filter;
             return this;
         }
 
@@ -136,22 +139,40 @@ public class HttpReporter extends ScheduledReporter {
         final MetricMessage message = new MetricMessage(gauges, counters, histograms, meters, timers);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
+        HttpPost req = new HttpPost(uri);
+
         try {
             Writer writer = new OutputStreamWriter(out, "UTF-8");
             mapper.writeValue(writer, message);
 
-            HttpPost req = new HttpPost(uri);
+
+
+            RequestConfig config = RequestConfig.custom()
+                    .setSocketTimeout(5000)
+                    .setConnectTimeout(5000)
+                    .setConnectionRequestTimeout(5000)
+                    .build();
+
+            req.setConfig(config);
 
             StringEntity entity = new StringEntity(out.toString());
             entity.setContentType("application/json");
 
             req.setEntity(entity);
 
-            httpClient.execute(req);
+            log.debug("Sending HTTP Request");
+
+            HttpResponse resp = httpClient.execute(req);
+
+            log.debug("Receive HTTP Response with status code {}", resp.getStatusLine().getStatusCode());
 
         } catch (IOException e) {
-            log.error("Could not send HTTP request");
+            log.error("Could not send HTTP request: {}", e.getMessage());
             e.printStackTrace();
+        }
+
+        finally {
+            req.releaseConnection();
         }
     }
 

@@ -54,6 +54,7 @@ public class HttpReporterConfig extends AbstractHttpReporterConfig implements Me
                                 .setPrefix(getResolvedPrefix())
                                 .setDatacenterName(getDatacenter())
                                 .setHostName(getHostname())
+                                .setFilter(MetricFilterTransformer.generateFilter(getPredicate()))
                                 .build();
 
             log.debug("Activating HttpReporterConfig for host {}:{}", hostPort.getHost(), hostPort.getPort());
